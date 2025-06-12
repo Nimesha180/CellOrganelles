@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Organelles Quiz Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .quiz-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .options {
+            margin-bottom: 20px;
+        }
+        .option {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #f0f0f0;
+        }
+        .selected {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            min-height: 20px;
+        }
+        .correct-feedback {
+            color: #155724;
+        }
+        .incorrect-feedback {
+            color: #721c24;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
+        .score-display {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .progress {
+            margin-top: 20px;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Cell Organelles Quiz</h1>
+        <p>Test your knowledge of cell organelles and their functions!</p>
+        
+        <div id="start-screen">
+            <button id="start-btn">Start Quiz</button>
+        </div>
+        
+        <div id="quiz-screen" class="hidden">
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <button id="next-btn" class="hidden">Next Question</button>
+        </div>
+        
+        <div id="results-screen" class="hidden">
+            <h2>Quiz Complete!</h2>
+            <div class="score-display">Your Score: <span id="score">0</span>/10</div>
+            <div id="detailed-results"></div>
+            <button id="restart-btn">Take Quiz Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions
+        const questions = [
+            {
+                question: "Which organelle is known as the 'powerhouse of the cell'?",
+                options: ["Nucleus", "Mitochondria", "Golgi Apparatus", "Endoplasmic Reticulum"],
+                answer: "Mitochondria",
+                explanation: "Mitochondria are called the powerhouse because they generate most of the cell's ATP through cellular respiration."
+            },
+            {
+                question: "What is the function of the Golgi apparatus?",
+                options: ["Protein synthesis", "Energy production", "Modifying, sorting and packaging proteins", "DNA replication"],
+                answer: "Modifying, sorting and packaging proteins",
+                explanation: "The Golgi apparatus modifies proteins from the ER and packages them into vesicles for transport."
+            },
+            {
+                question: "Which organelle contains digestive enzymes to break down waste?",
+                options: ["Ribosome", "Lysosome", "Peroxisome", "Vacuole"],
+                answer: "Lysosome",
+                explanation: "Lysosomes contain hydrolytic enzymes that digest cellular waste and foreign materials."
+            },
+            {
+                question: "Where are ribosomes synthesized in the cell?",
+                options: ["Nucleolus", "Golgi apparatus", "Smooth ER", "Mitochondria"],
+                answer: "Nucleolus",
+                explanation: "The nucleolus within the nucleus is where ribosomal RNA is synthesized and ribosomes are assembled."
+            },
+            {
+                question: "Which structure is responsible for protein synthesis?",
+                options: ["Mitochondria", "Lysosome", "Ribosome", "Golgi apparatus"],
+                answer: "Ribosome",
+                explanation: "Ribosomes are the cellular machines that translate mRNA into polypeptide chains during protein synthesis."
+            },
+            {
+                question: "What is the main function of the smooth endoplasmic reticulum?",
+                options: ["Protein synthesis", "Lipid synthesis and detoxification", "ATP production", "DNA replication"],
+                answer: "Lipid synthesis and detoxification",
+                explanation: "The smooth ER synthesizes lipids, metabolizes carbohydrates, and detoxifies drugs and poisons."
+            },
+            {
+                question: "Which organelle is involved in apoptosis (programmed cell death)?",
+                options: ["Nucleus", "Mitochondria", "Ribosome", "Golgi apparatus"],
+                answer: "Mitochondria",
+                explanation: "Mitochondria release cytochrome c during apoptosis, which activates caspases that execute cell death."
+            },
+            {
+                question: "What is the function of the cytoskeleton?",
+                options: ["Maintain cell shape and enable movement", "Produce ATP", "Synthesize proteins", "Store genetic information"],
+                answer: "Maintain cell shape and enable movement",
+                explanation: "The cytoskeleton provides structural support, enables cell movement, and facilitates intracellular transport."
+            },
+            {
+                question: "Which organelle is responsible for modifying and folding proteins?",
+                options: ["Rough ER", "Smooth ER", "Golgi apparatus", "Lysosome"],
+                answer: "Rough ER",
+                explanation: "The rough ER has ribosomes that synthesize proteins which are then folded and modified within its lumen."
+            },
+            {
+                question: "What is the function of the Na+/K+ pump?",
+                options: ["Generate ATP", "Maintain membrane potential", "Synthesize proteins", "Break down waste"],
+                answer: "Maintain membrane potential",
+                explanation: "The Na+/K+ pump maintains the electrochemical gradient across the membrane by pumping 3 Na+ out and 2 K+ in."
+            },
+            {
+                question: "Which organelle contains its own DNA?",
+                options: ["Nucleus only", "Mitochondria only", "Both nucleus and mitochondria", "Golgi apparatus"],
+                answer: "Both nucleus and mitochondria",
+                explanation: "Both the nucleus (with chromosomal DNA) and mitochondria (with circular mtDNA) contain their own genetic material."
+            },
+            {
+                question: "What is the function of peroxisomes?",
+                options: ["Protein synthesis", "Breakdown of fatty acids and detoxification", "ATP production", "DNA replication"],
+                answer: "Breakdown of fatty acids and detoxification",
+                explanation: "Peroxisomes break down fatty acids through β-oxidation and detoxify harmful substances like hydrogen peroxide."
+            },
+            {
+                question: "Which structure is responsible for cell movement using a '9+2' microtubule arrangement?",
+                options: ["Ribosome", "Centriole", "Cilia/flagella", "Nuclear pore"],
+                answer: "Cilia/flagella",
+                explanation: "Cilia and flagella contain a '9+2' arrangement of microtubules that enable their beating motion."
+            },
+            {
+                question: "What is the function of the nuclear pore complex?",
+                options: ["Protein synthesis", "Regulate movement between nucleus and cytoplasm", "ATP production", "Break down waste"],
+                answer: "Regulate movement between nucleus and cytoplasm",
+                explanation: "Nuclear pores selectively allow molecules like mRNA and proteins to move between the nucleus and cytoplasm."
+            },
+            {
+                question: "Which organelle is most involved in the production of steroid hormones?",
+                options: ["Rough ER", "Smooth ER", "Golgi apparatus", "Lysosome"],
+                answer: "Smooth ER",
+                explanation: "The smooth ER contains enzymes for steroid hormone synthesis, particularly in endocrine cells."
+            }
+        ];
+
+        // Game variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedQuestions = [];
+        let userAnswers = [];
+
+        // DOM elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const feedbackElement = document.getElementById('feedback');
+        const nextButton = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreElement = document.getElementById('score');
+        const detailedResults = document.getElementById('detailed-results');
+        const startButton = document.getElementById('start-btn');
+        const restartButton = document.getElementById('restart-btn');
+
+        // Start the quiz
+        startButton.addEventListener('click', startQuiz);
+        restartButton.addEventListener('click', startQuiz);
+
+        // Next question
+        nextButton.addEventListener('click', nextQuestion);
+
+        function startQuiz() {
+            // Reset game state
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            
+            // Select 10 random questions
+            selectedQuestions = [...questions]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 10);
+            
+            // Show quiz screen
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            // Load first question
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            // Update progress bar
+            progressBar.style.width = `${(currentQuestionIndex / selectedQuestions.length) * 100}%`;
+            
+            // Get current question
+            const currentQuestion = selectedQuestions[currentQuestionIndex];
+            
+            // Display question
+            questionElement.textContent = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+            
+            // Clear previous options and feedback
+            optionsElement.innerHTML = '';
+            feedbackElement.innerHTML = '';
+            feedbackElement.className = 'feedback';
+            nextButton.classList.add('hidden');
+            
+            // Create options
+            currentQuestion.options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => selectOption(optionElement, option));
+                optionsElement.appendChild(optionElement);
+            });
+        }
+
+        function selectOption(optionElement, selectedAnswer) {
+            // Disable all options
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.style.cursor = 'default';
+                option.removeEventListener('click', selectOption);
+            });
+            
+            // Get current question
+            const currentQuestion = selectedQuestions[currentQuestionIndex];
+            
+            // Store user answer
+            userAnswers.push({
+                question: currentQuestion.question,
+                userAnswer: selectedAnswer,
+                correctAnswer: currentQuestion.answer,
+                isCorrect: selectedAnswer === currentQuestion.answer,
+                explanation: currentQuestion.explanation
+            });
+            
+            // Check if answer is correct
+            if (selectedAnswer === currentQuestion.answer) {
+                optionElement.classList.add('correct');
+                feedbackElement.textContent = 'Correct! ' + currentQuestion.explanation;
+                feedbackElement.classList.add('correct-feedback');
+                score++;
+            } else {
+                optionElement.classList.add('incorrect');
+                // Highlight correct answer
+                options.forEach(option => {
+                    if (option.textContent === currentQuestion.answer) {
+                        option.classList.add('correct');
+                    }
+                });
+                feedbackElement.textContent = `Incorrect. The correct answer is: ${currentQuestion.answer}. ${currentQuestion.explanation}`;
+                feedbackElement.classList.add('incorrect-feedback');
+            }
+            
+            // Show next button
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < selectedQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            // Hide quiz screen
+            quizScreen.classList.add('hidden');
+            
+            // Show results screen
+            resultsScreen.classList.remove('hidden');
+            
+            // Display score
+            scoreElement.textContent = score;
+            
+            // Show detailed results
+            detailedResults.innerHTML = '<h3>Question Breakdown:</h3>';
+            userAnswers.forEach((answer, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.style.marginBottom = '15px';
+                resultItem.style.padding = '10px';
+                resultItem.style.border = '1px solid #ddd';
+                resultItem.style.borderRadius = '5px';
+                resultItem.style.backgroundColor = answer.isCorrect ? '#d4edda' : '#f8d7da';
+                
+                resultItem.innerHTML = `
+                    <p><strong>Question ${index + 1}:</strong> ${answer.question}</p>
+                    <p><strong>Your answer:</strong> ${answer.userAnswer} ${answer.isCorrect ? '✅' : '❌'}</p>
+                    ${!answer.isCorrect ? `<p><strong>Correct answer:</strong> ${answer.correctAnswer}</p>` : ''}
+                    <p><em>${answer.explanation}</em></p>
+                `;
+                
+                detailedResults.appendChild(resultItem);
+            });
+        }
+    </script>
+</body>
+</html>
